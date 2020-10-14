@@ -11,115 +11,69 @@ namespace Character.Attributes
 {
     class CharacterAttributeController : MonoBehaviour
     {
-
         CharacterDamageController characterDamage;
+        public Dictionary<DynamicAttributeType, Attribute> dynamicAttributes = new Dictionary<DynamicAttributeType, Attribute>();
+        public Dictionary<ScalableAttributeType, Attribute> scalableAttributes = new Dictionary<ScalableAttributeType, Attribute>();
 
-        public CharacterAttribute healthAmount = new CharacterAttribute(
-           type: CharacterAttributeType.HealthAmount,
-           baseAmount: 100
-        );
-        public CharacterAttribute healthMaximumAmount = new CharacterAttribute(
-            type: CharacterAttributeType.HealthMaximumAmount,
-            baseAmount: 100
-        );
 
-        public CharacterAttribute healthRegenerationAmount = new CharacterAttribute(
-            type: CharacterAttributeType.HealthRegeneratonAmount,
-            baseAmount: 0
-        );
-
-        public CharacterAttribute healthRegenerationRate = new CharacterAttribute(
-            type: CharacterAttributeType.HealthRegenerationRate,
-            baseAmount: 1
-        );
-
-        public CharacterAttribute energyShieldAmount = new CharacterAttribute(
-            type: CharacterAttributeType.EnergyShieldAmount,
-            baseAmount: 75
-        );
-
-        public CharacterAttribute energyShieldMaximumAmount = new CharacterAttribute(
-            type: CharacterAttributeType.EnergyShieldMaximumAmount,
-            baseAmount: 75
-        );
-
-        public CharacterAttribute energyShieldRechargeAmount = new CharacterAttribute(
-            type: CharacterAttributeType.EnergyShieldRechargeAmount,
-            baseAmount: 1
-        );
-
-        public CharacterAttribute energyShieldRechargeRate = new CharacterAttribute(
-            type: CharacterAttributeType.EnergyShieldRechargeRate,
-            baseAmount: 1
-        );
-
-        public CharacterAttribute energyShieldDelay = new CharacterAttribute(
-            type: CharacterAttributeType.EnergyShieldDelay,
-            baseAmount: 0
-        );
-
-        public CharacterAttribute energyShieldStartFasterRate = new CharacterAttribute(
-            type: CharacterAttributeType.EnergyShieldStartFasterRate,
-            baseAmount: 1
-        );
-
-        public CharacterAttribute staminaAmount = new CharacterAttribute(
-            type: CharacterAttributeType.StaminaAmount,
-            baseAmount: 50
-        );
-
-        public CharacterAttribute staminaMaximumAmount = new CharacterAttribute(
-            type: CharacterAttributeType.StaminaMaximumAmount,
-            baseAmount: 50
-        );
-
-        public CharacterAttribute staminaRegenerationAmount = new CharacterAttribute(
-            type: CharacterAttributeType.StaminaRegenerationAmount,
-            baseAmount: 5
-        );
-
-        public CharacterAttribute staminaRegenerationRate = new CharacterAttribute(
-            type: CharacterAttributeType.StaminaRegenerationRate,
-            baseAmount: 1
-        );
-
-        public CharacterAttribute armourAmount = new CharacterAttribute(
-            type: CharacterAttributeType.ArmourAmount,
-            baseAmount: 10
-        );
-
-        public CharacterAttribute armourQuality = new CharacterAttribute(
-            type: CharacterAttributeType.ArmourQuality,
-            baseAmount: 1
-        );
-
-        public CharacterAttribute moveSpeed = new CharacterAttribute(
-            type: CharacterAttributeType.MoveSpeed,
-            baseAmount: 3
-        );
 
         void Start()
         {
+
+
             characterDamage = GetComponent<CharacterDamageController>();
-            characterDamage.OnTakeDamage += (Damage damage) => { StopEnergyShieldRecharge(); };
+
+           
+
+            scalableAttributes.Add(ScalableAttributeType.HealthMaximumAmount, new Attribute(baseAmount: 100));
+            scalableAttributes.Add(ScalableAttributeType.HealthRegeneratonAmount, new Attribute(baseAmount: 0));
+            scalableAttributes.Add(ScalableAttributeType.HealthRegenerationRate, new Attribute(baseAmount: 1));
+            scalableAttributes.Add(ScalableAttributeType.EnergyShieldMaximumAmount, new Attribute(baseAmount: 75));
+            scalableAttributes.Add(ScalableAttributeType.EnergyShieldRechargeAmount, new Attribute(baseAmount: 1));
+            scalableAttributes.Add(ScalableAttributeType.EnergyShieldRechargeRate, new Attribute(baseAmount: 1));
+            scalableAttributes.Add(ScalableAttributeType.EnergyShieldStartFasterRate, new Attribute(baseAmount: 1));
+            scalableAttributes.Add(ScalableAttributeType.StaminaMaximumAmount, new Attribute(baseAmount: 100));
+            scalableAttributes.Add(ScalableAttributeType.StaminaRegenerationAmount, new Attribute(baseAmount: 20));
+            scalableAttributes.Add(ScalableAttributeType.StaminaRegenerationRate, new Attribute(baseAmount: 1));
+            scalableAttributes.Add(ScalableAttributeType.ArmourAmount, new Attribute(baseAmount: 0));
+            scalableAttributes.Add(ScalableAttributeType.ArmourQuality, new Attribute(baseAmount: 1));
+            scalableAttributes.Add(ScalableAttributeType.MovementSpeed, new Attribute(baseAmount: 10));
 
 
-            staminaAmount.MinAmount = -100;
+            dynamicAttributes.Add(DynamicAttributeType.HealthAmount, new Attribute(
+                baseAmount: scalableAttributes[ScalableAttributeType.HealthMaximumAmount].Amount
+            ));
+            dynamicAttributes.Add(DynamicAttributeType.EnergyShieldAmount, new Attribute(
+                baseAmount: scalableAttributes[ScalableAttributeType.EnergyShieldMaximumAmount].Amount
+            ));
+            dynamicAttributes.Add(DynamicAttributeType.StaminaAmount, new Attribute(
+                baseAmount: scalableAttributes[ScalableAttributeType.StaminaMaximumAmount].Amount
+            ));
+            dynamicAttributes.Add(DynamicAttributeType.EnergyShieldDelay, new Attribute(baseAmount: 4));
+
+            dynamicAttributes[DynamicAttributeType.StaminaAmount].MinAmount = -100;
+
+            characterDamage.OnTakeDamage += StopEnergyShieldRecharge;
 
             StartCoroutine(HealthCoroutine());
             StartCoroutine(EnergyShieldCoroutine());
             StartCoroutine(StaminaCoroutine());
         }
 
-        void StopEnergyShieldRecharge()
+        void StopEnergyShieldRecharge(Damage damage)
         {
-            energyShieldDelay.Amount = 4 * (1 / energyShieldStartFasterRate.Amount);
+            var energyShieldDelay = dynamicAttributes[DynamicAttributeType.EnergyShieldDelay];
+            energyShieldDelay.Amount = energyShieldDelay.BaseAmount * (1 / scalableAttributes[ScalableAttributeType.EnergyShieldStartFasterRate].Amount);
         }
 
         IEnumerator HealthCoroutine()
         {
             while (true)
             {
+                var healthAmount = dynamicAttributes[DynamicAttributeType.HealthAmount];
+                var healthMaximumAmount = scalableAttributes[ScalableAttributeType.HealthMaximumAmount];
+                var healthRegenerationAmount = scalableAttributes[ScalableAttributeType.HealthRegeneratonAmount];
+                var healthRegenerationRate = scalableAttributes[ScalableAttributeType.HealthRegenerationRate];
 
                 if (healthAmount.Amount < healthMaximumAmount.Amount)
                 {
@@ -133,8 +87,13 @@ namespace Character.Attributes
         {
             while (true)
             {
-
-                if(energyShieldDelay.Amount <= 0)
+                var energyShieldAmount = dynamicAttributes[DynamicAttributeType.EnergyShieldAmount];
+                var energyShieldDelay = dynamicAttributes[DynamicAttributeType.EnergyShieldDelay];
+                var energyShieldMaximumAmount = scalableAttributes[ScalableAttributeType.EnergyShieldMaximumAmount];
+                var energyShieldRechargeAmount = scalableAttributes[ScalableAttributeType.EnergyShieldRechargeAmount];
+                var energyShieldRechargeRate = scalableAttributes[ScalableAttributeType.EnergyShieldRechargeRate];
+                var energyShieldStartFasterRate = scalableAttributes[ScalableAttributeType.EnergyShieldStartFasterRate];
+                if (energyShieldDelay.Amount <= 0)
                 {
                     if (energyShieldAmount.Amount < energyShieldMaximumAmount.Amount)
                     {
@@ -154,7 +113,10 @@ namespace Character.Attributes
         {
             while (true)
             {
-
+                var staminaAmount = dynamicAttributes[DynamicAttributeType.StaminaAmount];
+                var staminaMaximumAmount = scalableAttributes[ScalableAttributeType.StaminaMaximumAmount];
+                var staminaRegenerationAmount = scalableAttributes[ScalableAttributeType.StaminaRegenerationAmount];
+                var staminaRegenerationRate = scalableAttributes[ScalableAttributeType.StaminaRegenerationRate];
                 if (staminaAmount.Amount < staminaMaximumAmount.Amount)
                 {
                     staminaAmount.Amount += (staminaRegenerationAmount.Amount * staminaRegenerationRate.Amount) * 0.05f;

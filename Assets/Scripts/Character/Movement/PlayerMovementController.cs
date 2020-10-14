@@ -17,19 +17,23 @@ public class PlayerMovementController : MonoBehaviour
 
     void Update()
     {
+        Attribute movementSpeed = attributes.scalableAttributes[ScalableAttributeType.MovementSpeed];
+
         moveHorizontal = Input.GetAxis("Horizontal");
         moveVertical = Input.GetAxis("Vertical");
 
-        playerRigidbody.velocity = new Vector2(moveHorizontal * attributes.moveSpeed.Amount, moveVertical * attributes.moveSpeed.Amount);
+        playerRigidbody.velocity = new Vector2(moveHorizontal * movementSpeed.Amount, moveVertical * movementSpeed.Amount);
 
         if (Input.GetKeyDown(KeyCode.Space)) Dash();
     }
 
     void Dash()
     {
-        if(attributes.staminaAmount.Amount > 0)
+        Attribute staminaAmount = attributes.dynamicAttributes[DynamicAttributeType.StaminaAmount];
+
+        if (staminaAmount.Amount > 0)
         {
-            attributes.staminaAmount.Amount -= 25;
+            staminaAmount.Amount -= 25;
             playerRigidbody.AddRelativeForce(new Vector2(moveHorizontal, moveVertical) * 5000);
         }
     }
