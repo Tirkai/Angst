@@ -25,12 +25,12 @@ public class PlayerHUDController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        Attribute healthAmount = attributes.dynamicAttributes[DynamicAttributeType.HealthAmount];
-        Attribute energyShieldAmount = attributes.dynamicAttributes[DynamicAttributeType.EnergyShieldAmount];
-        Attribute staminaAmount = attributes.dynamicAttributes[DynamicAttributeType.StaminaAmount];
-        Attribute healthMaximumAmount = attributes.scalableAttributes[ScalableAttributeType.HealthMaximumAmount];
-        Attribute energyShieldMaximumAmount = attributes.scalableAttributes[ScalableAttributeType.EnergyShieldMaximumAmount];
-        Attribute staminaMaximumAmount = attributes.scalableAttributes[ScalableAttributeType.StaminaMaximumAmount];
+        CharacterAttribute healthAmount = attributes.dynamicAttributes[DynamicAttributeType.HealthAmount];
+        CharacterAttribute energyShieldAmount = attributes.dynamicAttributes[DynamicAttributeType.EnergyShieldAmount];
+        CharacterAttribute staminaAmount = attributes.dynamicAttributes[DynamicAttributeType.StaminaAmount];
+        CharacterAttribute healthMaximumAmount = attributes.scalableAttributes[ScalableAttributeType.HealthMaximumAmount];
+        CharacterAttribute energyShieldMaximumAmount = attributes.scalableAttributes[ScalableAttributeType.EnergyShieldMaximumAmount];
+        CharacterAttribute staminaMaximumAmount = attributes.scalableAttributes[ScalableAttributeType.StaminaMaximumAmount];
 
         Debug.Log(staminaMaximumAmount.BaseAmount);
 

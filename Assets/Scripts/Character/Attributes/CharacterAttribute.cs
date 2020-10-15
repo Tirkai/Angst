@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Character.Attributes
 {
-    public class Attribute
+    public class CharacterAttribute
     {
         public float BaseAmount { get; set; }
         public float MinAmount { get; set; }
@@ -24,7 +24,7 @@ namespace Character.Attributes
             }
         }
 
-        public Attribute(float baseAmount)
+        public CharacterAttribute(float baseAmount)
         {
             MinAmount = 0;
             BaseAmount = baseAmount;

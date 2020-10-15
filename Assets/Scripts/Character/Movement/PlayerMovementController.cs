@@ -17,7 +17,7 @@ public class PlayerMovementController : MonoBehaviour
 
     void Update()
     {
-        Attribute movementSpeed = attributes.scalableAttributes[ScalableAttributeType.MovementSpeed];
+        CharacterAttribute movementSpeed = attributes.scalableAttributes[ScalableAttributeType.MovementSpeed];
 
         moveHorizontal = Input.GetAxis("Horizontal");
         moveVertical = Input.GetAxis("Vertical");
@@ -29,7 +29,7 @@ public class PlayerMovementController : MonoBehaviour
 
     void Dash()
     {
-        Attribute staminaAmount = attributes.dynamicAttributes[DynamicAttributeType.StaminaAmount];
+        CharacterAttribute staminaAmount = attributes.dynamicAttributes[DynamicAttributeType.StaminaAmount];
 
         if (staminaAmount.Amount > 0)
         {
