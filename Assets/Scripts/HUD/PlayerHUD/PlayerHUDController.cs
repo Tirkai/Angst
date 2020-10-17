@@ -25,28 +25,37 @@ public class PlayerHUDController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        healthSlider.value = attributes.healthAmount.Amount;
-        energyShieldSlider.value = attributes.energyShieldAmount.Amount;
+        CharacterAttribute healthAmount = attributes.dynamicAttributes[DynamicAttributeType.HealthAmount];
+        CharacterAttribute energyShieldAmount = attributes.dynamicAttributes[DynamicAttributeType.EnergyShieldAmount];
+        CharacterAttribute staminaAmount = attributes.dynamicAttributes[DynamicAttributeType.StaminaAmount];
+        CharacterAttribute healthMaximumAmount = attributes.scalableAttributes[ScalableAttributeType.HealthMaximumAmount];
+        CharacterAttribute energyShieldMaximumAmount = attributes.scalableAttributes[ScalableAttributeType.EnergyShieldMaximumAmount];
+        CharacterAttribute staminaMaximumAmount = attributes.scalableAttributes[ScalableAttributeType.StaminaMaximumAmount];
 
-        healthSlider.maxValue = attributes.healthMaximumAmount.Amount;
+        Debug.Log(staminaMaximumAmount.BaseAmount);
+
+        healthSlider.value = healthAmount.Amount;
+        energyShieldSlider.value = energyShieldAmount.Amount;
+
+        healthSlider.maxValue = healthMaximumAmount.Amount;
 
 
-        if (attributes.healthMaximumAmount.Amount > attributes.energyShieldMaximumAmount.Amount)
+        if (healthMaximumAmount.Amount > energyShieldMaximumAmount.Amount)
         {
-            energyShieldSlider.maxValue = attributes.healthMaximumAmount.Amount;
+            energyShieldSlider.maxValue = healthMaximumAmount.Amount;
         } else
         {
-            energyShieldSlider.maxValue = attributes.energyShieldMaximumAmount.Amount;
+            energyShieldSlider.maxValue = energyShieldMaximumAmount.Amount;
         }
 
-        staminaSlider.maxValue = attributes.staminaMaximumAmount.Amount;
-        staminaSlider.value = attributes.staminaAmount.Amount;
+        staminaSlider.maxValue = staminaMaximumAmount.Amount;
+        staminaSlider.value = staminaAmount.Amount;
 
-        healthText.text = Mathf.Floor(attributes.healthAmount.Amount).ToString();
+        healthText.text = Mathf.Floor(healthAmount.Amount).ToString();
 
-        if(attributes.energyShieldAmount.Amount > attributes.energyShieldMaximumAmount.Amount * 0.15f)
+        if(energyShieldAmount.Amount > energyShieldMaximumAmount.Amount * 0.15f)
         {
-            energyShieldText.text = Mathf.Floor(attributes.energyShieldAmount.Amount).ToString();
+            energyShieldText.text = Mathf.Floor(energyShieldAmount.Amount).ToString();
         } else
         {
             energyShieldText.text = "";

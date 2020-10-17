@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public enum SimpleModifierType
+enum DynamicAttributeType
 {
-    Increase,
-    More,
-    Less,
-    Add,
-    Remove,
-    Set
+    HealthAmount,
+    EnergyShieldAmount,
+    StaminaAmount,
+    EnergyShieldDelay
 }

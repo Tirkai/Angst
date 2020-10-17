@@ -6,4 +6,5 @@ using System.Threading.Tasks;
 
 public interface IAttributeModifier
 {
+    ScalableAttributeType AttributeType { get; set; }
 }

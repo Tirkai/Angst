@@ -7,7 +7,7 @@ public class CharacterDamageController : MonoBehaviour
 {
 
     public delegate void DamageHandler(Damage damage);
-    public event DamageHandler OnTakeDamage;
+    public event DamageHandler TakedDamage;
 
     CharacterAttributeController attributes;
 
@@ -19,12 +19,13 @@ public class CharacterDamageController : MonoBehaviour
 
     public void TakeDamage(Damage damage)
     {
-        OnTakeDamage?.Invoke(damage);
+        TakedDamage?.Invoke(damage);
 
         float initialDamage = damage.Amount;
-        CharacterAttribute energySheild = attributes.energyShieldAmount;
-        CharacterAttribute health = attributes.healthAmount;
-        CharacterAttribute armour = attributes.armourAmount;
+        CharacterAttribute energySheild = attributes.dynamicAttributes[DynamicAttributeType.EnergyShieldAmount];
+        CharacterAttribute health = attributes.dynamicAttributes[DynamicAttributeType.HealthAmount];
+        CharacterAttribute armour = attributes.scalableAttributes[ScalableAttributeType.ArmourAmount];
+        CharacterAttribute armourQuality = attributes.scalableAttributes[ScalableAttributeType.ArmourQuality];
 
         float damageWithConsumedEnergyShield = initialDamage;
 
@@ -41,9 +42,9 @@ public class CharacterDamageController : MonoBehaviour
         float damageWithArmourReduction = damageWithConsumedEnergyShield * 0.7f;
         float damageAvoidedArmour = damageWithConsumedEnergyShield * 0.3f;
 
-        if (damageWithArmourReduction >= armour.Amount * attributes.armourQuality.Amount)
+        if (damageWithArmourReduction >= armour.Amount * armourQuality.Amount)
         {
-            damageWithArmourReduction -= armour.Amount * attributes.armourQuality.Amount;
+            damageWithArmourReduction -= armour.Amount * armourQuality.Amount;
         } else
         {
             damageWithArmourReduction = 0;
