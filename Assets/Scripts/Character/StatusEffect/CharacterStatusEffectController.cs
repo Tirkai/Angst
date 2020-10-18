@@ -12,15 +12,13 @@ public class CharacterStatusEffectController : MonoBehaviour
    
     public void AddStatusEffect(StatusEffect statusEffect)
     {
-        if (!statusEffect.IsStackable)
+        var findedItems = allStatusEffects.FindAll(item => item.Key == statusEffect.Key);
+        if (findedItems.Count >= statusEffect.MaxStackSize)
         {
-            var findedItem = allStatusEffects.Find(item => item.Key == statusEffect.Key);
-            if(findedItem != null)
-            {
-                allStatusEffects.Remove(findedItem);
-            }
+            allStatusEffects.Remove(findedItems[0]);
         }
         allStatusEffects.Add(statusEffect);
+
         ChangedStatusEffect.Invoke(statusEffect, allStatusEffects);
     }
 
@@ -45,6 +43,8 @@ public class CharacterStatusEffectController : MonoBehaviour
     {
         while (true)
         {
+            Debug.Log("Count " + allStatusEffects.Count.ToString());
+
             var iteratedList = allStatusEffects.ToList();
             foreach(var item in iteratedList)
             {

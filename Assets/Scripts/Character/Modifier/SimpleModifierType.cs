@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 public enum SimpleModifierType
 {
-    Increase,
-    More,
-    Less,
-    Add,
-    Remove,
-    Set
+    Add = 1,
+    Increase = 2,
+    More = 3,
+    Less = 4,
+    Remove = 5,
+    Set = 6
 }

@@ -11,15 +11,15 @@ public class StatusEffect
     public List<IAttributeModifier> modifiers = new List<IAttributeModifier>();
     public bool IsExpired {get; set; }
 
-    public bool IsStackable { get; set; }
+    public int MaxStackSize { get; set; }
 
     public string Key { get; set; }
-    public StatusEffect(List<IAttributeModifier> modifiers, bool isDurationable, float duration = 0, bool isStackable = false, string key = "")
+    public StatusEffect(List<IAttributeModifier> modifiers, bool isDurationable, float duration = 0, int maxStackSize = 1, string key = "")
     {
         this.modifiers = modifiers;
         Duration = duration;
         IsDurationable = isDurationable;
-        IsStackable = isStackable;
+        MaxStackSize = maxStackSize;
         Key = key;
     }
 }

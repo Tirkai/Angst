@@ -82,23 +82,34 @@ class CharacterAttributeController : MonoBehaviour
         StartCoroutine(StaminaCoroutine());
 
         dynamicAttributes[DynamicAttributeType.EnergyShieldAmount].Amount = 0;
-
-
-       
-
     }
-
 
     void OnTakedDamage(Damage damage)
     {
         StopEnergyShieldRecharge();
         
-        var modifiers = new List<IAttributeModifier>();
-        modifiers.Add(new SimpleAttributeModifier(ScalableAttributeType.MovementSpeed, SimpleModifierType.Add, 0.5f));
+        var modifiers1 = new List<IAttributeModifier>();
+        modifiers1.Add(new SimpleAttributeModifier(ScalableAttributeType.HealthRegeneratonAmount, SimpleModifierType.Add, 1f));
+        //modifiers1.Add(new SimpleAttributeModifier(ScalableAttributeType.HealthRegeneratonAmount, SimpleModifierType.Add, 1f));
+
+        //modifiers1.Add(new SimpleAttributeModifier(ScalableAttributeType.HealthRegeneratonAmount, SimpleModifierType.Add, 10));
+        //modifiers1.Add(new SimpleAttributeModifier(ScalableAttributeType.HealthMaximumAmount, SimpleModifierType.Increase, 1f));
+
+
+
+        var modifiers2 = new List<IAttributeModifier>();
+         // modifiers2.Add(new SimpleAttributeModifier(ScalableAttributeType.HealthRegeneratonAmount, SimpleModifierType.Add, 1f));
+       // modifiers2.Add(new SimpleAttributeModifier(ScalableAttributeType.EnergyShieldStartFasterRate, SimpleModifierType.Less, 0.1f));
+
+        //modifiers2.Add(new SimpleAttributeModifier(ScalableAttributeType.MovementSpeed, SimpleModifierType.Less, 0.1f));
+
 
         // TEST
-        characterStatusEffect.AddStatusEffect(new StatusEffect(modifiers: modifiers, isDurationable: true, duration: 2, key: "Test", isStackable: false));
+        characterStatusEffect.AddStatusEffect(new StatusEffect(modifiers: modifiers1, isDurationable: true, duration: 10, maxStackSize: 1, key: "Test"));
+        characterStatusEffect.AddStatusEffect(new StatusEffect(modifiers: modifiers2, isDurationable: true, duration: 4, maxStackSize: 1, key: "Kek"));
 
+
+        Debug.Log("HP: " + scalableAttributes[ScalableAttributeType.HealthMaximumAmount].Amount.ToString());
     }
 
     void StopEnergyShieldRecharge()
@@ -107,8 +118,6 @@ class CharacterAttributeController : MonoBehaviour
         {
             var energyShieldDelay = dynamicAttributes[DynamicAttributeType.EnergyShieldDelay];
             energyShieldDelay.Amount = energyShieldDelay.BaseAmount * (1 / scalableAttributes[ScalableAttributeType.EnergyShieldStartFasterRate].Amount);
-
-          
         }
     }
 
@@ -198,23 +207,59 @@ class CharacterAttributeController : MonoBehaviour
         // MERGE
         List<IAttributeModifier> modifiers = statusEffectModifiers;
 
-        
         foreach(var item in scalableAttributes)
         {
             CharacterAttribute attribute = item.Value;
-            float recalculatedValue = attribute.BaseAmount;
             List<IAttributeModifier> mods = modifiers.FindAll(mod => mod.AttributeType == item.Key);
-            foreach(var mod in mods)
+
+            Dictionary<SimpleModifierType, float> values = new Dictionary<SimpleModifierType, float>();
+
+            List<SimpleAttributeModifier> simpleModifiers = mods
+                .Where(x => x is SimpleAttributeModifier)
+                .Select(x => (SimpleAttributeModifier)x)
+                .ToList();
+
+            float GetAccumulatedAttributeValue(SimpleModifierType type) => simpleModifiers
+                .Where(x => x.Type == type)
+                .Select(x => x.Amount)
+                .Aggregate(0f, (acc, x) => (acc + x));
+
+            float GetExactMinimalAttributeValue(SimpleModifierType type)
             {
-                if (mod is SimpleAttributeModifier)
+                var exactModifiers = simpleModifiers.Where(x => x.Type == type).ToList();
+                if (exactModifiers.Count > 0)
                 {
-                    SimpleAttributeModifier modifier = (SimpleAttributeModifier)mod;
-                    recalculatedValue += modifier.Calculate(item.Value);
+                    return exactModifiers
+                        .Select(x => x.Amount)
+                        .Min();
+                } else
+                {
+                    return -1;
                 }
             }
-            Debug.Log("RECALCULATED " + recalculatedValue.ToString());
 
-            attribute.Amount = recalculatedValue;
+            values.Add(SimpleModifierType.Add, GetAccumulatedAttributeValue(SimpleModifierType.Add));
+            values.Add(SimpleModifierType.Increase, GetAccumulatedAttributeValue(SimpleModifierType.Increase));
+            values.Add(SimpleModifierType.More, GetAccumulatedAttributeValue(SimpleModifierType.More));
+            values.Add(SimpleModifierType.Less, GetAccumulatedAttributeValue(SimpleModifierType.Less));
+            values.Add(SimpleModifierType.Remove, GetAccumulatedAttributeValue(SimpleModifierType.Remove));
+            values.Add(SimpleModifierType.Set, GetExactMinimalAttributeValue(SimpleModifierType.Set));
+
+            float totalValue;
+            if(values[SimpleModifierType.Set] <= -1)
+            {
+                float increasedValue = (attribute.BaseAmount + values[SimpleModifierType.Add]) *
+                    (1 + values[SimpleModifierType.Increase]) *
+                    (1 + values[SimpleModifierType.More]);
+
+                float decreasedValue = (increasedValue * values[SimpleModifierType.Less]) + values[SimpleModifierType.Remove];
+                totalValue = increasedValue - decreasedValue;
+            } else
+            {
+                totalValue = values[SimpleModifierType.Set];
+            }
+
+            attribute.Amount = totalValue;
         }
         
         if(dynamicAttributes[DynamicAttributeType.HealthAmount].Amount >= scalableAttributes[ScalableAttributeType.HealthMaximumAmount].Amount)
@@ -231,23 +276,6 @@ class CharacterAttributeController : MonoBehaviour
         {
             dynamicAttributes[DynamicAttributeType.StaminaAmount].Amount = scalableAttributes[ScalableAttributeType.StaminaMaximumAmount].Amount;
         }
-
-        /*
-        foreach(var item in modifiers)
-        {
-            float recalculatedValue = item
-            if (item is SimpleAttributeModifier)
-            {
-                SimpleAttributeModifier mod = (SimpleAttributeModifier)item;
-                CharacterAttribute attribute = scalableAttributes[mod.AttributeType];
-                float recalculatedValue = mod.Calculate(attribute);
-                Debug.Log("RECALC " + recalculatedValue.ToString());
-                attribute.Amount = attribute.BaseAmount + recalculatedValue;
-            }
-        }
-        */
-
-
 
     }
 }

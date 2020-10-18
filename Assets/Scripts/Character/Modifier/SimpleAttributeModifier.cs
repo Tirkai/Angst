@@ -23,7 +23,7 @@ public class SimpleAttributeModifier : IAttributeModifier
         switch (Type)
         {
             case SimpleModifierType.Add:
-                return attribute.BaseAmount + Amount;
+                return ( attribute.BaseAmount + Amount);
             case SimpleModifierType.Increase:
                 return attribute.BaseAmount * Amount;
             case SimpleModifierType.Set:
