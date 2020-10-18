@@ -205,19 +205,27 @@ class CharacterAttributeController : MonoBehaviour
     void RecalculateAttributeValuesWithModifiers()
     {
         // MERGE
-        List<IAttributeModifier> modifiers = statusEffectModifiers;
+        List<IAttributeModifier> allModifiers = statusEffectModifiers;
 
-        foreach(var item in scalableAttributes)
+        List<T> GetModifiersList<T>(List<IAttributeModifier> modifiers)
+            {
+                return modifiers
+                    .Where(x => x is T)
+                    .Select(x => (T)x)
+                    .ToList();
+            }
+
+
+        foreach(var attr in scalableAttributes)
         {
-            CharacterAttribute attribute = item.Value;
-            List<IAttributeModifier> mods = modifiers.FindAll(mod => mod.AttributeType == item.Key);
+
+            CharacterAttribute attribute = attr.Value;
+            List<IAttributeModifier> currentAttributeModifiers = allModifiers.FindAll(mod => mod.AttributeType == attr.Key);
 
             Dictionary<SimpleModifierType, float> values = new Dictionary<SimpleModifierType, float>();
 
-            List<SimpleAttributeModifier> simpleModifiers = mods
-                .Where(x => x is SimpleAttributeModifier)
-                .Select(x => (SimpleAttributeModifier)x)
-                .ToList();
+            List<SimpleAttributeModifier> simpleModifiers = GetModifiersList<SimpleAttributeModifier>(currentAttributeModifiers);
+            List<ScaleAttributeModifier> scaleModifiers = GetModifiersList<ScaleAttributeModifier>(currentAttributeModifiers);
 
             float GetAccumulatedAttributeValue(SimpleModifierType type) => simpleModifiers
                 .Where(x => x.Type == type)
